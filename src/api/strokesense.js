@@ -5,7 +5,7 @@ import axios from 'axios'
 const envUrl = import.meta.env.VITE_API_BASE_URL
 const BASE_URL = import.meta.env.DEV
   ? envUrl || ''
-  : envUrl ?? 'http://localhost:3000'
+  : envUrl ?? 'https://strokesense-backend.vercel.app'
 
 const api = axios.create({
   baseURL: BASE_URL,
