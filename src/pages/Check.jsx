@@ -335,11 +335,15 @@ export default function Check() {
                     {...register('bmi')}
                   />
                   <BMICalculator
-                    onResult={(val) => {
-                      setValue('bmi', val)
-                      trigger('bmi')
-                    }}
-                  />
+                  onResult={(value) => {
+                    setValue('bmi', value, {
+                      shouldValidate: true,
+                      shouldDirty: true,
+                      shouldTouch: true
+                    })
+                    trigger('bmi')
+                  }}
+                />
                 </div>
               </div>
             )}
