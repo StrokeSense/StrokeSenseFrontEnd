@@ -19,9 +19,9 @@ export function usePrediction() {
         err.response?.data?.message ||
         err.response?.data?.error ||
         (isNetworkError
-          ? 'Could not reach the backend. Start it on http://localhost:3000, restart the frontend dev server, then try again.'
+          ? 'Could not reach the backend. Start it on https://strokesense-backend.vercel.app, restart the frontend dev server, then try again.'
           : err.message) ||
-        'Could not reach the backend. Make sure the backend server is running on http://localhost:3000 and try again.'
+        'Could not reach the backend. Make sure the backend server is running on https://strokesense-backend.vercel.app and try again.'
       setError(message)
       throw err
     } finally {

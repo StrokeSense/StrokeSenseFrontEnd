@@ -68,7 +68,7 @@ export default function Dashboard() {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          'Could not reach the backend. Start it on http://localhost:3000, restart the frontend dev server, then refresh.'
+          'Could not reach the backend. Start it on https://strokesense-backend.vercel.app, restart the frontend dev server, then refresh.'
       )
     } finally {
       setLoading(false)
