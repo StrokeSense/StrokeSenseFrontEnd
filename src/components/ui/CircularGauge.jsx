@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import NumberFlow from '@number-flow/react'
 import { getRiskColor } from '../../utils/riskUtils'
 
 const SIZE = 200
@@ -36,14 +37,11 @@ export default function CircularGauge({ percent, riskLevel }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <motion.span
+        <NumberFlow
+          value={Math.round(percent)}
+          suffix="%"
           className="text-4xl font-extrabold text-text"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4 }}
-        >
-          {Math.round(percent)}%
-        </motion.span>
+        />
         <span className="text-sm text-muted">Stroke Risk</span>
       </div>
     </div>
