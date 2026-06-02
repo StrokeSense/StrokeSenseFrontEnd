@@ -5,8 +5,11 @@ import {
   Activity,
   ArrowRight,
   ClipboardList,
+  HeartPulse,
   LineChart,
   Shield,
+  ShieldCheck,
+  Users,
 } from 'lucide-react'
 import PageWrapper from '../components/layout/PageWrapper'
 import Button from '../components/ui/Button'
@@ -34,7 +37,7 @@ function useCountUp(target, duration = 1500, enabled = true) {
   return value
 }
 
-function StatCard({ value, suffix, label, delay }) {
+function StatCard({ value, suffix, label, delay, Icon }) {
   const [visible, setVisible] = useState(false)
   const count = useCountUp(value, 1200, visible)
 
@@ -45,7 +48,8 @@ function StatCard({ value, suffix, label, delay }) {
 
   return (
     <Card className="text-center">
-      <p className="text-3xl font-extrabold text-primary sm:text-4xl">
+      <Icon className="mx-auto mb-2 h-5 w-5 text-primary" aria-hidden="true" />
+      <p className="text-4xl font-extrabold text-primary sm:text-5xl">
         {count}
         {suffix}
       </p>
@@ -56,16 +60,19 @@ function StatCard({ value, suffix, label, delay }) {
 
 const explainerSteps = [
   {
+    step: '01',
     icon: ClipboardList,
     title: 'Enter Health Data',
     desc: 'Complete a short 3-step form with your health profile.',
   },
   {
+    step: '02',
     icon: Activity,
     title: 'System Analyzes',
     desc: 'Our model evaluates stroke risk from your clinical inputs.',
   },
   {
+    step: '03',
     icon: LineChart,
     title: 'Get Risk Score',
     desc: 'Receive a clear probability score and personalized guidance.',
@@ -95,30 +102,51 @@ export default function Home() {
               StrokeSense helps you understand your stroke risk early — so you
               can take action while prevention is still possible.
             </p>
-            <Link to="/check" className="mt-8 inline-block">
-              <Button className="gap-2 px-8 text-base">
-                Check Your Risk
-                <ArrowRight className="h-5 w-5" />
-              </Button>
-            </Link>
+            <div className="mt-8 flex flex-col items-center gap-3">
+              <Link to="/check">
+                <Button className="gap-2 px-8 text-base">
+                  Check Your Risk
+                  <ArrowRight className="h-5 w-5" />
+                </Button>
+              </Link>
+              <a
+                href="#how-it-works"
+                className="text-sm text-muted underline-offset-4 transition-colors hover:text-primary hover:underline"
+              >
+                See how it works ↓
+              </a>
+            </div>
           </motion.div>
         </PageWrapper>
       </section>
 
       <PageWrapper>
         <div className="grid gap-4 sm:grid-cols-3">
-          <StatCard value={1} suffix=" in 4" label="Adults Will Have a Stroke" delay={0} />
-          <StatCard value={80} suffix="%" label="Are Preventable" delay={150} />
+          <StatCard
+            value={1}
+            suffix=" in 4"
+            label="Adults Will Have a Stroke"
+            delay={0}
+            Icon={Users}
+          />
+          <StatCard
+            value={80}
+            suffix="%"
+            label="Are Preventable"
+            delay={150}
+            Icon={ShieldCheck}
+          />
           <StatCard
             value={100}
             suffix="%"
             label="Early Detection Saves Lives"
             delay={300}
+            Icon={HeartPulse}
           />
         </div>
 
-        <section className="mt-16">
-          <h2 className="mb-8 text-center text-2xl font-bold text-text">
+        <section id="how-it-works" className="mt-16 scroll-mt-24">
+          <h2 className="mb-8 text-center text-2xl font-extrabold tracking-tight text-text">
             How It Works
           </h2>
           <div className="grid gap-6 md:grid-cols-3">
@@ -134,7 +162,10 @@ export default function Home() {
                 {i < explainerSteps.length - 1 && (
                   <div className="absolute left-[calc(50%+40px)] top-10 hidden h-0.5 w-[calc(100%-80px)] bg-primary/30 md:block" />
                 )}
-                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-teal-50 text-primary">
+                <p className="mb-2 text-xs font-bold text-primary/50">
+                  {step.step}
+                </p>
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-teal-50 text-primary">
                   <step.icon className="h-7 w-7" />
                 </div>
                 <h3 className="font-semibold text-text">{step.title}</h3>

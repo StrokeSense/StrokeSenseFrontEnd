@@ -42,6 +42,12 @@ function formatValue(key, value) {
   return String(value ?? '—')
 }
 
+const RISK_HEADLINES = {
+  Low: "You're in good shape 👍",
+  Medium: 'Worth keeping an eye on',
+  High: 'Please consult a doctor soon',
+}
+
 export default function Result() {
   const navigate = useNavigate()
 
@@ -86,6 +92,11 @@ export default function Result() {
 
         <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
           <Card className="flex flex-col items-center justify-center p-6 text-center">
+            {RISK_HEADLINES[riskLevel] && (
+              <p className="mb-3 text-center text-lg font-semibold text-text">
+                {RISK_HEADLINES[riskLevel]}
+              </p>
+            )}
             <CircularGauge percent={probabilityPercent} riskLevel={riskLevel} />
 
             <div className="mt-5">
@@ -112,7 +123,7 @@ export default function Result() {
                 <ul className="space-y-2 text-sm text-muted">
                   {prediction.factors.map((factor) => (
                     <li key={factor} className="flex gap-2">
-                      <span>•</span>
+                      <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-amber-400" />
                       <span>{factor}</span>
                     </li>
                   ))}
@@ -130,7 +141,7 @@ export default function Result() {
                 <ul className="space-y-2 text-sm text-muted">
                   {prediction.recommendations.map((rec) => (
                     <li key={rec} className="flex gap-2">
-                      <span>•</span>
+                      <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
                       <span>{rec}</span>
                     </li>
                   ))}
@@ -139,7 +150,7 @@ export default function Result() {
             )}
 
             {prediction?.disclaimer && (
-              <div className="flex gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
+              <div className="flex gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-base text-blue-800">
                 <Info className="mt-0.5 h-5 w-5 shrink-0" />
                 <p>{prediction.disclaimer}</p>
               </div>

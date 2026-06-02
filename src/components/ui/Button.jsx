@@ -25,7 +25,7 @@ export default function Button({
       disabled={disabled}
       onClick={onClick}
       whileTap={{ scale: disabled ? 1 : 0.98 }}
-      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${className}`}
+      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${variant === 'primary' ? 'relative overflow-hidden btn-shimmer' : ''} ${variants[variant]} ${className}`}
       {...props}
     >
       {children}

@@ -10,7 +10,13 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from 'recharts'
-import { Trash2, ClipboardPlus } from 'lucide-react'
+import {
+  Trash2,
+  ClipboardPlus,
+  ClipboardList,
+  Activity,
+  TrendingUp,
+} from 'lucide-react'
 
 import PageWrapper from '../components/layout/PageWrapper'
 import Card from '../components/ui/Card'
@@ -62,7 +68,7 @@ export default function Dashboard() {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          'Failed to load predictions. Is the backend running?',
+          'Could not reach the backend. Start it on http://localhost:3000, restart the frontend dev server, then refresh.'
       )
     } finally {
       setLoading(false)
@@ -72,6 +78,15 @@ export default function Dashboard() {
   useEffect(() => {
     fetchPredictions()
   }, [fetchPredictions])
+
+  const requestDelete = (id) => {
+    const confirmed = window.confirm(
+      'Delete this prediction from your history? This cannot be undone.',
+    )
+    if (confirmed) {
+      handleDelete(id)
+    }
+  }
 
   const handleDelete = async (id) => {
     setDeletingId(id)
@@ -158,6 +173,7 @@ export default function Dashboard() {
 
         <div className="mb-6 grid gap-4 md:grid-cols-3">
           <Card className="p-5">
+            <ClipboardList className="mb-2 h-5 w-5 text-primary" />
             <p className="text-sm text-muted">Total Checks</p>
             <p className="mt-2 text-3xl font-bold text-text">
               {predictions.length}
@@ -165,6 +181,7 @@ export default function Dashboard() {
           </Card>
 
           <Card className="p-5">
+            <Activity className="mb-2 h-5 w-5 text-primary" />
             <p className="text-sm text-muted">Latest Risk</p>
             <div className="mt-3">
               {latest?.prediction?.riskLevel && (
@@ -174,6 +191,7 @@ export default function Dashboard() {
           </Card>
 
           <Card className="p-5">
+            <TrendingUp className="mb-2 h-5 w-5 text-primary" />
             <p className="text-sm text-muted">Latest Score</p>
             <p className="mt-2 text-3xl font-bold text-text">
               {Number(latest?.prediction?.probabilityPercent ?? 0).toFixed(1)}%
@@ -187,7 +205,7 @@ export default function Dashboard() {
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
                 <Tooltip
@@ -196,12 +214,35 @@ export default function Dashboard() {
                     'Risk Score',
                   ]}
                 />
-                <ReferenceLine y={70} strokeDasharray="4 4" />
+                <ReferenceLine
+                  y={35}
+                  stroke="#d97706"
+                  strokeDasharray="4 4"
+                  label={{
+                    value: 'Medium',
+                    position: 'right',
+                    fontSize: 11,
+                    fill: '#d97706',
+                  }}
+                />
+                <ReferenceLine
+                  y={70}
+                  stroke="#dc2626"
+                  strokeDasharray="4 4"
+                  label={{
+                    value: 'High',
+                    position: 'right',
+                    fontSize: 11,
+                    fill: '#dc2626',
+                  }}
+                />
                 <Line
                   type="monotone"
                   dataKey="score"
+                  stroke="#0d9488"
                   strokeWidth={3}
                   dot={{ r: 4 }}
+                  activeDot={{ r: 6, fill: '#0d9488' }}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -246,7 +287,7 @@ export default function Dashboard() {
 
                     <button
                       type="button"
-                      onClick={() => handleDelete(p.id)}
+                      onClick={() => requestDelete(p.id)}
                       disabled={deletingId === p.id}
                       className="flex min-h-11 min-w-11 items-center justify-center rounded-full text-red-500 hover:bg-red-50 disabled:opacity-50"
                       aria-label="Delete prediction"
@@ -295,7 +336,7 @@ export default function Dashboard() {
                       <td className="py-4 pr-4 text-right">
                         <button
                           type="button"
-                          onClick={() => handleDelete(p.id)}
+                          onClick={() => requestDelete(p.id)}
                           disabled={deletingId === p.id}
                           className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full text-red-500 hover:bg-red-50 disabled:opacity-50"
                           aria-label="Delete prediction"

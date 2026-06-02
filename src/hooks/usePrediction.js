@@ -12,11 +12,16 @@ export function usePrediction() {
       const response = await createPrediction(payload)
       return response
     } catch (err) {
+      const isNetworkError =
+        !err.response &&
+        (err.code === 'ERR_NETWORK' || err.message === 'Network Error')
       const message =
         err.response?.data?.message ||
         err.response?.data?.error ||
-        err.message ||
-        'Failed to get prediction. Please try again.'
+        (isNetworkError
+          ? 'Could not reach the backend. Start it on http://localhost:3000, restart the frontend dev server, then try again.'
+          : err.message) ||
+        'Could not reach the backend. Make sure the backend server is running on http://localhost:3000 and try again.'
       setError(message)
       throw err
     } finally {

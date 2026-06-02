@@ -14,6 +14,8 @@ import StepIndicator from '../components/forms/StepIndicator'
 import FormField from '../components/forms/FormField'
 import ToggleButton from '../components/forms/ToggleButton'
 import SelectField from '../components/forms/SelectField'
+import InfoTooltip from '../components/ui/InfoTooltip'
+import BMICalculator from '../components/ui/BMICalculator'
 import { usePrediction } from '../hooks/usePrediction'
 
 const predictionSchema = z.object({
@@ -82,6 +84,12 @@ const STEP_FIELDS = {
   3: ['avg_glucose_level', 'bmi'],
 }
 
+const STEP_DESCRIPTIONS = {
+  1: 'Basic information about you',
+  2: 'Your medical and health background',
+  3: 'Two key clinical measurements',
+}
+
 const defaultValues = {
   age: '',
   hypertension: 0,
@@ -103,11 +111,12 @@ export default function Check() {
     control,
     handleSubmit,
     trigger,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(predictionSchema),
     defaultValues,
-    mode: 'onTouched',
+    mode: 'all',
   })
 
   const goNext = async () => {
@@ -154,7 +163,7 @@ export default function Check() {
           <p className="text-sm font-semibold uppercase tracking-wide text-primary">
             StrokeSense
           </p>
-          <h1 className="mt-2 text-3xl font-bold text-text md:text-4xl">
+          <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-text md:text-4xl">
             Stroke Risk Check
           </h1>
           <p className="mt-3 text-muted">
@@ -165,18 +174,32 @@ export default function Check() {
         <Card className="p-6 md:p-8">
           <StepIndicator currentStep={step} />
 
-          <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
+          <p className="mb-6 text-sm text-muted">{STEP_DESCRIPTIONS[step]}</p>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-2 space-y-6">
             {step === 1 && (
-              <div className="space-y-5">
-                <Input
-                  label="Age"
-                  type="number"
-                  min="0"
-                  max="120"
-                  placeholder="Example: 55"
-                  error={errors.age?.message}
-                  {...register('age')}
-                />
+              <div className="space-y-7">
+                <div>
+                  <div className="mb-1.5 flex items-center gap-1.5">
+                    <label
+                      htmlFor="age"
+                      className="text-base font-medium text-text"
+                    >
+                      Age
+                    </label>
+                    <InfoTooltip content="Enter your current age in years. The model uses ages from 0 to 120." />
+                  </div>
+                  <Input
+                    id="age"
+                    type="number"
+                    min="0"
+                    max="120"
+                    required
+                    placeholder="Example: 55"
+                    error={errors.age?.message}
+                    {...register('age')}
+                  />
+                </div>
 
                 <Controller
                   name="ever_married"
@@ -212,7 +235,7 @@ export default function Check() {
             )}
 
             {step === 2 && (
-              <div className="space-y-5">
+              <div className="space-y-7">
                 <Controller
                   name="hypertension"
                   control={control}
@@ -265,35 +288,71 @@ export default function Check() {
             )}
 
             {step === 3 && (
-              <div className="space-y-5">
-                <Input
-                  label="Average Glucose Level"
-                  type="number"
-                  min="0"
-                  max="400"
-                  step="0.01"
-                  placeholder="Example: 180"
-                  unit="mg/dL"
-                  error={errors.avg_glucose_level?.message}
-                  {...register('avg_glucose_level')}
-                />
+              <div className="space-y-7">
+                <div>
+                  <div className="mb-1.5 flex items-center gap-1.5">
+                    <label
+                      htmlFor="avg_glucose_level"
+                      className="text-base font-medium text-text"
+                    >
+                      Average Glucose Level
+                    </label>
+                    <InfoTooltip content="Average glucose level in your blood, measured in mg/dL. You can get this value from a glucometer at home or from a recent blood test. Normal fasting range is 70–100 mg/dL." />
+                  </div>
+                  <Input
+                    id="avg_glucose_level"
+                    type="number"
+                    min="0"
+                    max="400"
+                    step="0.01"
+                    required
+                    placeholder="Example: 180"
+                    unit="mg/dL"
+                    error={errors.avg_glucose_level?.message}
+                    {...register('avg_glucose_level')}
+                  />
+                </div>
 
-                <Input
-                  label="BMI"
-                  type="number"
-                  min="5"
-                  max="100"
-                  step="0.1"
-                  placeholder="Example: 29.5"
-                  error={errors.bmi?.message}
-                  {...register('bmi')}
-                />
+                <div>
+                  <div className="mb-1.5 flex items-center gap-1.5">
+                    <label
+                      htmlFor="bmi"
+                      className="text-base font-medium text-text"
+                    >
+                      BMI
+                    </label>
+                    <InfoTooltip content="Body Mass Index is calculated from your height and weight. Normal range is 18.5–24.9. Use the calculator below if you don't know yours." />
+                  </div>
+                  <Input
+                    id="bmi"
+                    type="number"
+                    min="5"
+                    max="100"
+                    step="0.1"
+                    required
+                    placeholder="Example: 29.5"
+                    error={errors.bmi?.message}
+                    {...register('bmi')}
+                  />
+                  <BMICalculator
+                    onResult={(val) => {
+                      setValue('bmi', val)
+                      trigger('bmi')
+                    }}
+                  />
+                </div>
               </div>
             )}
 
             {error && (
               <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                 {error}
+              </div>
+            )}
+
+            {Object.keys(errors).some((key) => STEP_FIELDS[step].includes(key)) && (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                Please fill in all required fields before continuing.
               </div>
             )}
 

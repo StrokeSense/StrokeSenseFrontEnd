@@ -1,6 +1,11 @@
 import axios from 'axios'
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL
+// In dev, use same-origin + Vite proxy (see vite.config.js) to avoid CORS when the
+// frontend runs on a different port (e.g. 5174). Set VITE_API_BASE_URL for production.
+const envUrl = import.meta.env.VITE_API_BASE_URL
+const BASE_URL = import.meta.env.DEV
+  ? envUrl || ''
+  : envUrl ?? 'http://localhost:3000'
 
 const api = axios.create({
   baseURL: BASE_URL,
