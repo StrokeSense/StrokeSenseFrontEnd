@@ -2,6 +2,42 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Button from './Button'
 import Input from './Input'
+import { useLanguage } from '../../i18n/LanguageContext'
+
+const content = {
+  en: {
+    toggle: "Don't know your BMI? Calculate it →",
+    metric: 'Metric',
+    imperial: 'Imperial',
+    weightKg: 'Weight (kg)',
+    weightLbs: 'Weight (lbs)',
+    heightCm: 'Height (cm)',
+    heightFt: 'Height (ft)',
+    heightIn: 'Height (in)',
+    weightKgPlaceholder: 'e.g. 70',
+    weightLbsPlaceholder: 'e.g. 154',
+    heightCmPlaceholder: 'e.g. 170',
+    calculate: 'Calculate',
+    result: 'Your BMI is',
+    useValue: 'Use this value',
+  },
+  id: {
+    toggle: 'Tidak tahu BMI kamu? Hitung di sini →',
+    metric: 'Metrik',
+    imperial: 'Imperial',
+    weightKg: 'Berat badan (kg)',
+    weightLbs: 'Berat badan (lbs)',
+    heightCm: 'Tinggi badan (cm)',
+    heightFt: 'Tinggi badan (ft)',
+    heightIn: 'Tinggi badan (in)',
+    weightKgPlaceholder: 'contoh: 70',
+    weightLbsPlaceholder: 'contoh: 154',
+    heightCmPlaceholder: 'contoh: 170',
+    calculate: 'Hitung',
+    result: 'BMI kamu adalah',
+    useValue: 'Gunakan nilai ini',
+  },
+}
 
 export default function BMICalculator({ onResult }) {
   const [open, setOpen] = useState(false)
@@ -11,6 +47,9 @@ export default function BMICalculator({ onResult }) {
   const [heightFt, setHeightFt] = useState('')
   const [heightIn, setHeightIn] = useState('')
   const [result, setResult] = useState(null)
+
+  const { language } = useLanguage()
+  const t = content[language] ?? content.en
 
   const calculate = () => {
     let bmi = null
@@ -53,7 +92,7 @@ export default function BMICalculator({ onResult }) {
         onClick={() => setOpen((v) => !v)}
         className="mt-2 inline-flex min-h-11 items-center text-sm font-medium text-primary hover:text-primary-dark"
       >
-        Don&apos;t know your BMI? Calculate it →
+        {t.toggle}
       </button>
 
       <AnimatePresence>
@@ -79,7 +118,7 @@ export default function BMICalculator({ onResult }) {
                       : 'border-slate-200 bg-white text-muted'
                   }`}
                 >
-                  Metric
+                  {t.metric}
                 </button>
                 <button
                   type="button"
@@ -93,25 +132,25 @@ export default function BMICalculator({ onResult }) {
                       : 'border-slate-200 bg-white text-muted'
                   }`}
                 >
-                  Imperial
+                  {t.imperial}
                 </button>
               </div>
 
               {unit === 'metric' ? (
                 <div className="space-y-3">
                   <Input
-                    label="Weight (kg)"
+                    label={t.weightKg}
                     type="number"
                     min="1"
-                    placeholder="e.g. 70"
+                    placeholder={t.weightKgPlaceholder}
                     value={weight}
                     onChange={(e) => setWeight(e.target.value)}
                   />
                   <Input
-                    label="Height (cm)"
+                    label={t.heightCm}
                     type="number"
                     min="1"
-                    placeholder="e.g. 170"
+                    placeholder={t.heightCmPlaceholder}
                     value={height}
                     onChange={(e) => setHeight(e.target.value)}
                   />
@@ -119,16 +158,16 @@ export default function BMICalculator({ onResult }) {
               ) : (
                 <div className="space-y-3">
                   <Input
-                    label="Weight (lbs)"
+                    label={t.weightLbs}
                     type="number"
                     min="1"
-                    placeholder="e.g. 154"
+                    placeholder={t.weightLbsPlaceholder}
                     value={weight}
                     onChange={(e) => setWeight(e.target.value)}
                   />
                   <div className="grid grid-cols-2 gap-3">
                     <Input
-                      label="Height (ft)"
+                      label={t.heightFt}
                       type="number"
                       min="0"
                       placeholder="5"
@@ -136,7 +175,7 @@ export default function BMICalculator({ onResult }) {
                       onChange={(e) => setHeightFt(e.target.value)}
                     />
                     <Input
-                      label="Height (in)"
+                      label={t.heightIn}
                       type="number"
                       min="0"
                       max="11"
@@ -150,11 +189,11 @@ export default function BMICalculator({ onResult }) {
 
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <Button type="button" onClick={calculate} className="min-h-11">
-                  Calculate
+                  {t.calculate}
                 </Button>
                 {result != null && (
                   <span className="rounded-full bg-primary px-3 py-1 text-sm font-semibold text-white">
-                    Your BMI is {result}
+                    {t.result} {result}
                   </span>
                 )}
               </div>
@@ -166,7 +205,7 @@ export default function BMICalculator({ onResult }) {
                   className="mt-3 min-h-11 w-full sm:w-auto"
                   onClick={handleUse}
                 >
-                  Use this value
+                  {t.useValue}
                 </Button>
               )}
             </div>
