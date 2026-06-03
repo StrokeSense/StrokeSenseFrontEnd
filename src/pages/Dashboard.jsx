@@ -21,11 +21,15 @@ import {
 import PageWrapper from '../components/layout/PageWrapper'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
-import Spinner from '../components/ui/Spinner'
 import RiskBadge from '../components/ui/RiskBadge'
-import { getPredictions, deletePrediction } from '../api/strokesense'
+import {
+  getLocalPredictionHistory,
+  clearLocalPredictionHistory,
+} from '../utils/localHistory'
 
 function formatDate(iso) {
+  if (!iso) return 'Unknown date'
+
   return new Date(iso).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -34,6 +38,8 @@ function formatDate(iso) {
 }
 
 function formatChartDate(iso) {
+  if (!iso) return 'Unknown'
+
   return new Date(iso).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -49,90 +55,58 @@ function getPredictionTitle(prediction) {
 
 export default function Dashboard() {
   const [predictions, setPredictions] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [deletingId, setDeletingId] = useState(null)
 
-  const fetchPredictions = useCallback(async () => {
-    setLoading(true)
-    setError(null)
+  const loadLocalHistory = useCallback(() => {
+    const localHistory = getLocalPredictionHistory()
 
-    try {
-      const response = await getPredictions()
-      const list = response?.data ?? response ?? []
-      const sorted = [...list].sort(
-        (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
-      )
+    const sorted = [...localHistory].sort(
+      (a, b) =>
+        new Date(a.createdAt || a.savedAt || 0) -
+        new Date(b.createdAt || b.savedAt || 0),
+    )
 
-      setPredictions(sorted)
-    } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          'Could not reach the backend. Start it on https://strokesense-backend.vercel.app, restart the frontend dev server, then refresh.'
-      )
-    } finally {
-      setLoading(false)
-    }
+    setPredictions(sorted)
   }, [])
 
   useEffect(() => {
-    fetchPredictions()
-  }, [fetchPredictions])
+    loadLocalHistory()
+  }, [loadLocalHistory])
 
   const requestDelete = (id) => {
     const confirmed = window.confirm(
-      'Delete this prediction from your history? This cannot be undone.',
+      'Delete this prediction from your browser history? This cannot be undone.',
     )
-    if (confirmed) {
-      handleDelete(id)
-    }
+
+    if (!confirmed) return
+
+    const updated = predictions.filter((prediction) => prediction.id !== id)
+
+    localStorage.setItem(
+      'strokesensePredictionHistory',
+      JSON.stringify(updated),
+    )
+
+    setPredictions(updated)
   }
 
-  const handleDelete = async (id) => {
-    setDeletingId(id)
+  const requestClearAll = () => {
+    const confirmed = window.confirm(
+      'Clear all prediction history from this browser?',
+    )
 
-    try {
-      await deletePrediction(id)
-      await fetchPredictions()
-    } catch {
-      setError('Failed to delete prediction.')
-    } finally {
-      setDeletingId(null)
-    }
+    if (!confirmed) return
+
+    clearLocalPredictionHistory()
+    setPredictions([])
   }
 
   const latest = predictions[predictions.length - 1]
 
   const chartData = predictions.map((p) => ({
-    date: formatChartDate(p.createdAt),
+    date: formatChartDate(p.createdAt || p.savedAt),
     score: p.prediction?.probabilityPercent ?? 0,
-    fullDate: p.createdAt,
+    fullDate: p.createdAt || p.savedAt,
   }))
-
-  if (loading) {
-    return (
-      <PageWrapper className="py-20">
-        <div className="flex justify-center">
-          <Spinner />
-        </div>
-      </PageWrapper>
-    )
-  }
-
-  if (error && predictions.length === 0) {
-    return (
-      <PageWrapper className="py-20">
-        <div className="mx-auto max-w-xl px-4">
-          <Card className="p-6 text-center">
-            <p className="text-red-600">{error}</p>
-            <Button className="mt-4" onClick={fetchPredictions}>
-              Retry
-            </Button>
-          </Card>
-        </div>
-      </PageWrapper>
-    )
-  }
 
   if (predictions.length === 0) {
     return (
@@ -142,7 +116,10 @@ export default function Dashboard() {
             <ClipboardPlus className="mx-auto h-12 w-12 text-primary" />
             <h2 className="mt-4 text-2xl font-bold text-text">No Checks Yet</h2>
             <p className="mt-2 text-muted">
-              Run your first stroke risk assessment to see your history and trends here.
+              Run your first stroke risk assessment to see your private browser history here.
+            </p>
+            <p className="mt-2 text-sm text-muted">
+              Your history is stored only on this device/browser for privacy.
             </p>
             <Link
               to="/check"
@@ -167,8 +144,12 @@ export default function Dashboard() {
             Prediction History
           </h1>
           <p className="mt-3 text-muted">
-            Review submitted checks and risk trends from the backend history.
+            Review submitted checks and risk trends saved privately in this browser.
           </p>
+        </div>
+
+        <div className="mb-6 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+          For privacy, this history is stored only on this device/browser. Other users cannot see it.
         </div>
 
         <div className="mb-6 grid gap-4 md:grid-cols-3">
@@ -249,14 +230,19 @@ export default function Dashboard() {
           </div>
         </Card>
 
-        {error && (
-          <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
         <Card className="p-6">
-          <h2 className="mb-4 text-xl font-bold text-text">All Predictions</h2>
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-xl font-bold text-text">All Predictions</h2>
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={requestClearAll}
+              className="text-red-600 hover:bg-red-50"
+            >
+              Clear Browser History
+            </Button>
+          </div>
 
           <div className="space-y-4 md:hidden">
             {predictions
@@ -273,7 +259,7 @@ export default function Dashboard() {
                         {getPredictionTitle(p)}
                       </p>
                       <p className="mt-1 text-sm text-muted">
-                        {formatDate(p.createdAt)}
+                        {formatDate(p.createdAt || p.savedAt)}
                       </p>
                     </div>
 
@@ -288,15 +274,10 @@ export default function Dashboard() {
                     <button
                       type="button"
                       onClick={() => requestDelete(p.id)}
-                      disabled={deletingId === p.id}
-                      className="flex min-h-11 min-w-11 items-center justify-center rounded-full text-red-500 hover:bg-red-50 disabled:opacity-50"
+                      className="flex min-h-11 min-w-11 items-center justify-center rounded-full text-red-500 hover:bg-red-50"
                       aria-label="Delete prediction"
                     >
-                      {deletingId === p.id ? (
-                        <Spinner size="sm" />
-                      ) : (
-                        <Trash2 className="h-5 w-5" />
-                      )}
+                      <Trash2 className="h-5 w-5" />
                     </button>
                   </div>
                 </div>
@@ -322,7 +303,7 @@ export default function Dashboard() {
                   .map((p) => (
                     <tr key={p.id} className="border-b border-slate-100">
                       <td className="py-4 pr-4 text-muted">
-                        {formatDate(p.createdAt)}
+                        {formatDate(p.createdAt || p.savedAt)}
                       </td>
                       <td className="py-4 pr-4 font-medium text-text">
                         {getPredictionTitle(p)}
@@ -337,15 +318,10 @@ export default function Dashboard() {
                         <button
                           type="button"
                           onClick={() => requestDelete(p.id)}
-                          disabled={deletingId === p.id}
-                          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full text-red-500 hover:bg-red-50 disabled:opacity-50"
+                          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full text-red-500 hover:bg-red-50"
                           aria-label="Delete prediction"
                         >
-                          {deletingId === p.id ? (
-                            <Spinner size="sm" />
-                          ) : (
-                            <Trash2 className="h-5 w-5" />
-                          )}
+                          <Trash2 className="h-5 w-5" />
                         </button>
                       </td>
                     </tr>

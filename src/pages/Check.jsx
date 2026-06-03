@@ -17,6 +17,7 @@ import SelectField from '../components/forms/SelectField'
 import InfoTooltip from '../components/ui/InfoTooltip'
 import BMICalculator from '../components/ui/BMICalculator'
 import { usePrediction } from '../hooks/usePrediction'
+import { saveLocalPrediction } from '../utils/localHistory'
 
 const predictionSchema = z.object({
   age: z.coerce
@@ -148,7 +149,7 @@ export default function Check() {
       const response = await predict(payload)
 
       if (response?.success && response?.data) {
-        sessionStorage.setItem('lastPrediction', JSON.stringify(response.data))
+        saveLocalPrediction(response.data)
         navigate('/result')
       }
     } catch {
