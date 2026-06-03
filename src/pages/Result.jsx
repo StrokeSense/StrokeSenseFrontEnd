@@ -40,6 +40,12 @@ const content = {
       Private: 'Private',
       'Self-employed': 'Self-employed',
     },
+    smokingStatuses: {
+      'formerly smoked': 'Formerly Smoked',
+      'never smoked': 'Never Smoked',
+      smokes: 'Currently Smokes',
+      Unknown: 'Unknown',
+    },
     riskHeadlines: {
       Low: "You're in good shape 👍",
       Medium: 'Worth keeping an eye on',
@@ -77,6 +83,12 @@ const content = {
       Private: 'Swasta',
       'Self-employed': 'Wiraswasta',
     },
+    smokingStatuses: {
+      'formerly smoked': 'Pernah Merokok',
+      'never smoked': 'Tidak Pernah Merokok',
+      smokes: 'Masih Merokok',
+      Unknown: 'Tidak Diketahui',
+    },
     riskHeadlines: {
       Low: 'Kondisimu terlihat cukup baik 👍',
       Medium: 'Perlu tetap diperhatikan',
@@ -92,6 +104,10 @@ function formatValue(key, value, t) {
 
   if (key === 'work_type') {
     return t.workTypes[value] ?? value
+  }
+
+  if (key === 'smoking_status') {
+    return t.smokingStatuses?.[value] ?? value
   }
 
   if (key === 'avg_glucose_level') return `${value} mg/dL`
