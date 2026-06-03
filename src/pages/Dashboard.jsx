@@ -143,9 +143,6 @@ export default function Dashboard() {
           <h1 className="mt-2 text-3xl font-bold text-text md:text-4xl">
             Prediction History
           </h1>
-          <p className="mt-3 text-muted">
-            Review submitted checks and risk trends saved privately in this browser.
-          </p>
         </div>
 
         <div className="mb-6 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">

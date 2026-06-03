@@ -20,10 +20,22 @@ import { usePrediction } from '../hooks/usePrediction'
 import { saveLocalPrediction } from '../utils/localHistory'
 
 const predictionSchema = z.object({
-  age: z.coerce
-    .number({ invalid_type_error: 'Age is required' })
-    .min(0, 'Age must be at least 0')
-    .max(120, 'Age must be at most 120'),
+  age: z.preprocess(
+    (value) => {
+      if (value === '' || value === null || value === undefined) {
+        return undefined
+      }
+
+      return Number(value)
+    },
+    z
+      .number({
+        required_error: 'Age is required',
+        invalid_type_error: 'Age is required',
+      })
+      .min(0, 'Age must be at least 0')
+      .max(120, 'Age must be at most 120'),
+  ),
 
   hypertension: z.union([z.literal(0), z.literal(1)]),
 
