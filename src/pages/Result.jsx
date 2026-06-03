@@ -176,9 +176,12 @@ export default function Result() {
         </Card>
 
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Button as={Link} to="/check">
-            Check Again
-          </Button>
+          <Link
+              to="/check"
+              className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-dark"
+            >
+              Check Again
+            </Link>
           <Link
             to="/dashboard"
             className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-primary bg-white px-5 py-2.5 text-sm font-semibold text-primary transition hover:bg-teal-50"
