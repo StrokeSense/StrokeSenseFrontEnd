@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -18,6 +18,7 @@ import InfoTooltip from '../components/ui/InfoTooltip'
 import BMICalculator from '../components/ui/BMICalculator'
 import { usePrediction } from '../hooks/usePrediction'
 import { saveLocalPrediction } from '../utils/localHistory'
+import { useLanguage } from '../i18n/LanguageContext'
 
 const predictionSchema = z.object({
   age: z.preprocess(
@@ -66,41 +67,10 @@ const predictionSchema = z.object({
   ),
 })
 
-const WORK_OPTIONS = [
-  { value: 'children', label: 'Children' },
-  { value: 'Govt_job', label: 'Government Job' },
-  { value: 'Never_worked', label: 'Never Worked' },
-  { value: 'Private', label: 'Private' },
-  { value: 'Self-employed', label: 'Self-employed' },
-]
-
-const SMOKING_OPTIONS = [
-  { value: 'formerly smoked', label: 'Formerly Smoked' },
-  { value: 'never smoked', label: 'Never Smoked' },
-  { value: 'smokes', label: 'Currently Smokes' },
-  { value: 'Unknown', label: 'Unknown' },
-]
-
-const YES_NO_OPTIONS = [
-  { value: 1, label: 'Yes' },
-  { value: 0, label: 'No' },
-]
-
-const MARRIED_OPTIONS = [
-  { value: 'Yes', label: 'Yes' },
-  { value: 'No', label: 'No' },
-]
-
 const STEP_FIELDS = {
   1: ['age', 'ever_married', 'work_type'],
   2: ['hypertension', 'heart_disease', 'smoking_status'],
   3: ['avg_glucose_level', 'bmi'],
-}
-
-const STEP_DESCRIPTIONS = {
-  1: 'Basic information about you',
-  2: 'Your medical and health background',
-  3: 'Two key clinical measurements',
 }
 
 const defaultValues = {
@@ -114,10 +84,160 @@ const defaultValues = {
   smoking_status: 'never smoked',
 }
 
+const content = {
+  en: {
+    pageLabel: 'StrokeSense',
+    title: 'Stroke Risk Check',
+    subtitle:
+      'Complete all steps using the 8 health fields required by the AI model.',
+    stepDescriptions: {
+      1: 'Basic information about you',
+      2: 'Your medical and health background',
+      3: 'Two key clinical measurements',
+    },
+    labels: {
+      age: 'Age',
+      everMarried: 'Ever Married',
+      workType: 'Work Type',
+      hypertension: 'Do you have hypertension?',
+      heartDisease: 'Do you have heart disease?',
+      smokingStatus: 'Smoking Status',
+      glucose: 'Average Glucose Level',
+      bmi: 'BMI',
+    },
+    placeholders: {
+      age: 'Example: 55',
+      glucose: 'Example: 180',
+      bmi: 'Example: 29.5',
+    },
+    tooltips: {
+      age: 'Enter your current age in years. The model uses ages from 0 to 120.',
+      glucose:
+        'Average glucose level in your blood, measured in mg/dL. You can get this value from a glucometer at home or from a recent blood test. Normal fasting range is 70–100 mg/dL.',
+      bmi: "Body Mass Index is calculated from your height and weight. Normal range is 18.5–24.9. Use the calculator below if you don't know yours.",
+    },
+    alerts: {
+      required: 'Please fill in all required fields before continuing.',
+    },
+    buttons: {
+      back: 'Back',
+      next: 'Next',
+      analyzing: 'Analyzing…',
+      submit: 'Get My Risk Score',
+    },
+    options: {
+      yes: 'Yes',
+      no: 'No',
+      children: 'Children',
+      govt: 'Government Job',
+      neverWorked: 'Never Worked',
+      private: 'Private',
+      selfEmployed: 'Self-employed',
+      formerlySmoked: 'Formerly Smoked',
+      neverSmoked: 'Never Smoked',
+      smokes: 'Currently Smokes',
+      unknown: 'Unknown',
+    },
+  },
+  id: {
+    pageLabel: 'StrokeSense',
+    title: 'Cek Risiko Stroke',
+    subtitle:
+      'Lengkapi semua langkah dengan 8 data kesehatan yang dibutuhkan oleh model AI.',
+    stepDescriptions: {
+      1: 'Informasi dasar tentang kamu',
+      2: 'Riwayat medis dan kondisi kesehatan',
+      3: 'Dua pengukuran klinis utama',
+    },
+    labels: {
+      age: 'Usia',
+      everMarried: 'Pernah Menikah',
+      workType: 'Jenis Pekerjaan',
+      hypertension: 'Apakah kamu memiliki hipertensi?',
+      heartDisease: 'Apakah kamu memiliki penyakit jantung?',
+      smokingStatus: 'Status Merokok',
+      glucose: 'Rata-rata Kadar Glukosa',
+      bmi: 'BMI',
+    },
+    placeholders: {
+      age: 'Contoh: 55',
+      glucose: 'Contoh: 180',
+      bmi: 'Contoh: 29.5',
+    },
+    tooltips: {
+      age: 'Masukkan usia kamu saat ini dalam satuan tahun. Model menerima rentang usia 0 sampai 120.',
+      glucose:
+        'Rata-rata kadar glukosa dalam darah, diukur dalam mg/dL. Nilai ini bisa didapat dari alat cek gula darah atau hasil tes darah terbaru. Rentang puasa normal sekitar 70–100 mg/dL.',
+      bmi: 'Body Mass Index dihitung dari tinggi dan berat badan. Rentang normal sekitar 18.5–24.9. Gunakan kalkulator di bawah jika kamu belum tahu BMI kamu.',
+    },
+    alerts: {
+      required: 'Harap isi semua data yang wajib sebelum melanjutkan.',
+    },
+    buttons: {
+      back: 'Kembali',
+      next: 'Lanjut',
+      analyzing: 'Menganalisis…',
+      submit: 'Lihat Skor Risiko',
+    },
+    options: {
+      yes: 'Ya',
+      no: 'Tidak',
+      children: 'Anak-anak',
+      govt: 'Pekerjaan Pemerintah',
+      neverWorked: 'Belum Pernah Bekerja',
+      private: 'Swasta',
+      selfEmployed: 'Wiraswasta',
+      formerlySmoked: 'Pernah Merokok',
+      neverSmoked: 'Tidak Pernah Merokok',
+      smokes: 'Masih Merokok',
+      unknown: 'Tidak Diketahui',
+    },
+  },
+}
+
 export default function Check() {
   const [step, setStep] = useState(1)
   const navigate = useNavigate()
   const { predict, loading, error, clearError } = usePrediction()
+  const { language } = useLanguage()
+  const t = content[language] ?? content.en
+
+  const workOptions = useMemo(
+    () => [
+      { value: 'children', label: t.options.children },
+      { value: 'Govt_job', label: t.options.govt },
+      { value: 'Never_worked', label: t.options.neverWorked },
+      { value: 'Private', label: t.options.private },
+      { value: 'Self-employed', label: t.options.selfEmployed },
+    ],
+    [t],
+  )
+
+  const smokingOptions = useMemo(
+    () => [
+      { value: 'formerly smoked', label: t.options.formerlySmoked },
+      { value: 'never smoked', label: t.options.neverSmoked },
+      { value: 'smokes', label: t.options.smokes },
+      { value: 'Unknown', label: t.options.unknown },
+    ],
+    [t],
+  )
+
+  const yesNoOptions = useMemo(
+    () => [
+      { value: 1, label: t.options.yes },
+      { value: 0, label: t.options.no },
+    ],
+    [t],
+  )
+
+  const marriedOptions = useMemo(
+    () => [
+      { value: 'Yes', label: t.options.yes },
+      { value: 'No', label: t.options.no },
+    ],
+    [t],
+  )
 
   const {
     register,
@@ -174,20 +294,20 @@ export default function Check() {
       <div className="mx-auto max-w-3xl px-4">
         <div className="mb-8 text-center">
           <p className="text-sm font-semibold uppercase tracking-wide text-primary">
-            StrokeSense
+            {t.pageLabel}
           </p>
           <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-text md:text-4xl">
-            Stroke Risk Check
+            {t.title}
           </h1>
-          <p className="mt-3 text-muted">
-            Complete all steps using the 8 health fields required by the AI model.
-          </p>
+          <p className="mt-3 text-muted">{t.subtitle}</p>
         </div>
 
         <Card className="p-6 md:p-8">
           <StepIndicator currentStep={step} />
 
-          <p className="mb-6 text-sm text-muted">{STEP_DESCRIPTIONS[step]}</p>
+          <p className="mb-6 text-sm text-muted">
+            {t.stepDescriptions[step]}
+          </p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="mt-2 space-y-6">
             {step === 1 && (
@@ -198,9 +318,9 @@ export default function Check() {
                       htmlFor="age"
                       className="text-base font-medium text-text"
                     >
-                      Age
+                      {t.labels.age}
                     </label>
-                    <InfoTooltip content="Enter your current age in years. The model uses ages from 0 to 120." />
+                    <InfoTooltip content={t.tooltips.age} />
                   </div>
                   <Input
                     id="age"
@@ -208,7 +328,7 @@ export default function Check() {
                     min="0"
                     max="120"
                     required
-                    placeholder="Example: 55"
+                    placeholder={t.placeholders.age}
                     error={errors.age?.message}
                     {...register('age')}
                   />
@@ -219,12 +339,12 @@ export default function Check() {
                   control={control}
                   render={({ field }) => (
                     <FormField
-                      label="Ever Married"
+                      label={t.labels.everMarried}
                       error={errors.ever_married?.message}
                     >
                       <ToggleButton
                         name="ever_married"
-                        options={MARRIED_OPTIONS}
+                        options={marriedOptions}
                         value={field.value}
                         onChange={field.onChange}
                       />
@@ -237,8 +357,8 @@ export default function Check() {
                   control={control}
                   render={({ field }) => (
                     <SelectField
-                      label="Work Type"
-                      options={WORK_OPTIONS}
+                      label={t.labels.workType}
+                      options={workOptions}
                       error={errors.work_type?.message}
                       {...field}
                     />
@@ -254,12 +374,12 @@ export default function Check() {
                   control={control}
                   render={({ field }) => (
                     <FormField
-                      label="Do you have hypertension?"
+                      label={t.labels.hypertension}
                       error={errors.hypertension?.message}
                     >
                       <ToggleButton
                         name="hypertension"
-                        options={YES_NO_OPTIONS}
+                        options={yesNoOptions}
                         value={field.value}
                         onChange={field.onChange}
                       />
@@ -272,12 +392,12 @@ export default function Check() {
                   control={control}
                   render={({ field }) => (
                     <FormField
-                      label="Do you have heart disease?"
+                      label={t.labels.heartDisease}
                       error={errors.heart_disease?.message}
                     >
                       <ToggleButton
                         name="heart_disease"
-                        options={YES_NO_OPTIONS}
+                        options={yesNoOptions}
                         value={field.value}
                         onChange={field.onChange}
                       />
@@ -290,8 +410,8 @@ export default function Check() {
                   control={control}
                   render={({ field }) => (
                     <SelectField
-                      label="Smoking Status"
-                      options={SMOKING_OPTIONS}
+                      label={t.labels.smokingStatus}
+                      options={smokingOptions}
                       error={errors.smoking_status?.message}
                       {...field}
                     />
@@ -308,9 +428,9 @@ export default function Check() {
                       htmlFor="avg_glucose_level"
                       className="text-base font-medium text-text"
                     >
-                      Average Glucose Level
+                      {t.labels.glucose}
                     </label>
-                    <InfoTooltip content="Average glucose level in your blood, measured in mg/dL. You can get this value from a glucometer at home or from a recent blood test. Normal fasting range is 70–100 mg/dL." />
+                    <InfoTooltip content={t.tooltips.glucose} />
                   </div>
                   <Input
                     id="avg_glucose_level"
@@ -319,7 +439,7 @@ export default function Check() {
                     max="400"
                     step="0.01"
                     required
-                    placeholder="Example: 180"
+                    placeholder={t.placeholders.glucose}
                     unit="mg/dL"
                     error={errors.avg_glucose_level?.message}
                     {...register('avg_glucose_level')}
@@ -332,9 +452,9 @@ export default function Check() {
                       htmlFor="bmi"
                       className="text-base font-medium text-text"
                     >
-                      BMI
+                      {t.labels.bmi}
                     </label>
-                    <InfoTooltip content="Body Mass Index is calculated from your height and weight. Normal range is 18.5–24.9. Use the calculator below if you don't know yours." />
+                    <InfoTooltip content={t.tooltips.bmi} />
                   </div>
                   <Input
                     id="bmi"
@@ -343,20 +463,20 @@ export default function Check() {
                     max="100"
                     step="0.1"
                     required
-                    placeholder="Example: 29.5"
+                    placeholder={t.placeholders.bmi}
                     error={errors.bmi?.message}
                     {...register('bmi')}
                   />
                   <BMICalculator
-                  onResult={(value) => {
-                    setValue('bmi', value, {
-                      shouldValidate: true,
-                      shouldDirty: true,
-                      shouldTouch: true
-                    })
-                    trigger('bmi')
-                  }}
-                />
+                    onResult={(value) => {
+                      setValue('bmi', value, {
+                        shouldValidate: true,
+                        shouldDirty: true,
+                        shouldTouch: true,
+                      })
+                      trigger('bmi')
+                    }}
+                  />
                 </div>
               </div>
             )}
@@ -369,7 +489,7 @@ export default function Check() {
 
             {Object.keys(errors).some((key) => STEP_FIELDS[step].includes(key)) && (
               <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                Please fill in all required fields before continuing.
+                {t.alerts.required}
               </div>
             )}
 
@@ -377,7 +497,7 @@ export default function Check() {
               {step > 1 ? (
                 <Button type="button" variant="secondary" onClick={goBack}>
                   <ChevronLeft className="h-4 w-4" />
-                  Back
+                  {t.buttons.back}
                 </Button>
               ) : (
                 <div />
@@ -385,7 +505,7 @@ export default function Check() {
 
               {step < 3 ? (
                 <Button type="button" onClick={goNext}>
-                  Next
+                  {t.buttons.next}
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               ) : (
@@ -393,10 +513,10 @@ export default function Check() {
                   {loading ? (
                     <>
                       <Spinner size="sm" />
-                      Analyzing…
+                      {t.buttons.analyzing}
                     </>
                   ) : (
-                    'Get My Risk Score'
+                    t.buttons.submit
                   )}
                 </Button>
               )}
