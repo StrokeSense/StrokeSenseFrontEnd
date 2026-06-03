@@ -1,15 +1,22 @@
 import { motion } from 'framer-motion'
 import NumberFlow from '@number-flow/react'
 import { getRiskColor } from '../../utils/riskUtils'
+import { useLanguage } from '../../i18n/LanguageContext'
 
 const SIZE = 200
 const STROKE = 14
 const RADIUS = (SIZE - STROKE) / 2
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 
+const labels = {
+  en: 'Stroke Risk',
+  id: 'Risiko Stroke',
+}
+
 export default function CircularGauge({ percent, riskLevel }) {
   const color = getRiskColor(riskLevel)
   const offset = CIRCUMFERENCE - (percent / 100) * CIRCUMFERENCE
+  const { language } = useLanguage()
 
   return (
     <div className="relative mx-auto" style={{ width: SIZE, height: SIZE }}>
@@ -42,7 +49,9 @@ export default function CircularGauge({ percent, riskLevel }) {
           suffix="%"
           className="text-4xl font-extrabold text-text"
         />
-        <span className="text-sm text-muted">Stroke Risk</span>
+        <span className="text-sm text-muted">
+          {labels[language] ?? labels.en}
+        </span>
       </div>
     </div>
   )

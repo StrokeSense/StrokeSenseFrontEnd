@@ -1,8 +1,15 @@
 import { Check } from 'lucide-react'
+import { useLanguage } from '../../i18n/LanguageContext'
 
-const steps = ['Personal', 'Lifestyle', 'Clinical']
+const labels = {
+  en: ['Personal', 'Lifestyle', 'Clinical'],
+  id: ['Pribadi', 'Gaya Hidup', 'Klinis'],
+}
 
 export default function StepIndicator({ currentStep }) {
+  const { language } = useLanguage()
+  const steps = labels[language] ?? labels.en
+
   return (
     <ol className="mb-8 flex items-center justify-center gap-2 sm:gap-4">
       {steps.map((label, index) => {

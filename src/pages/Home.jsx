@@ -14,6 +14,7 @@ import {
 import PageWrapper from '../components/layout/PageWrapper'
 import Button from '../components/ui/Button'
 import Card from '../components/ui/Card'
+import { useLanguage } from '../i18n/LanguageContext'
 
 function useCountUp(target, duration = 1500, enabled = true) {
   const [value, setValue] = useState(0)
@@ -58,28 +59,113 @@ function StatCard({ value, suffix, label, delay, Icon }) {
   )
 }
 
-const explainerSteps = [
-  {
-    step: '01',
-    icon: ClipboardList,
-    title: 'Enter Health Data',
-    desc: 'Complete a short 3-step form with your health profile.',
+const content = {
+  en: {
+    badge: 'Early Stroke Detection',
+    titleMain: 'Know Your Risk.',
+    titleHighlight: "Before It's Too Late.",
+    subtitle:
+      'StrokeSense helps you understand your stroke risk early — so you can take action while prevention is still possible.',
+    checkButton: 'Check Your Risk',
+    howItWorksLink: 'See how it works ↓',
+    stats: [
+      {
+        value: 1,
+        suffix: ' in 4',
+        label: 'Adults Will Have a Stroke',
+        icon: Users,
+      },
+      {
+        value: 80,
+        suffix: '%',
+        label: 'Are Preventable',
+        icon: ShieldCheck,
+      },
+      {
+        value: 100,
+        suffix: '%',
+        label: 'Early Detection Saves Lives',
+        icon: HeartPulse,
+      },
+    ],
+    howItWorksTitle: 'How It Works',
+    steps: [
+      {
+        step: '01',
+        icon: ClipboardList,
+        title: 'Enter Health Data',
+        desc: 'Complete a short 3-step form with your health profile.',
+      },
+      {
+        step: '02',
+        icon: Activity,
+        title: 'System Analyzes',
+        desc: 'Our model evaluates stroke risk from your clinical inputs.',
+      },
+      {
+        step: '03',
+        icon: LineChart,
+        title: 'Get Risk Score',
+        desc: 'Receive a clear probability score and personalized guidance.',
+      },
+    ],
   },
-  {
-    step: '02',
-    icon: Activity,
-    title: 'System Analyzes',
-    desc: 'Our model evaluates stroke risk from your clinical inputs.',
+  id: {
+    badge: 'Deteksi Dini Risiko Stroke',
+    titleMain: 'Kenali Risikomu.',
+    titleHighlight: 'Sebelum Terlambat.',
+    subtitle:
+      'StrokeSense membantu kamu memahami risiko stroke lebih awal, agar kamu bisa mengambil langkah pencegahan sebelum kondisi menjadi lebih serius.',
+    checkButton: 'Cek Risiko Sekarang',
+    howItWorksLink: 'Lihat cara kerjanya ↓',
+    stats: [
+      {
+        value: 1,
+        suffix: ' dari 4',
+        label: 'Orang Dewasa Berisiko Mengalami Stroke',
+        icon: Users,
+      },
+      {
+        value: 80,
+        suffix: '%',
+        label: 'Kasus Dapat Dicegah',
+        icon: ShieldCheck,
+      },
+      {
+        value: 100,
+        suffix: '%',
+        label: 'Deteksi Dini Membantu Menyelamatkan Nyawa',
+        icon: HeartPulse,
+      },
+    ],
+    howItWorksTitle: 'Cara Kerja',
+    steps: [
+      {
+        step: '01',
+        icon: ClipboardList,
+        title: 'Masukkan Data Kesehatan',
+        desc: 'Isi form singkat berisi profil kesehatan dasar kamu.',
+      },
+      {
+        step: '02',
+        icon: Activity,
+        title: 'Sistem Menganalisis',
+        desc: 'Model AI mengevaluasi risiko stroke dari input kesehatan yang kamu berikan.',
+      },
+      {
+        step: '03',
+        icon: LineChart,
+        title: 'Lihat Skor Risiko',
+        desc: 'Dapatkan skor probabilitas risiko dan arahan awal yang mudah dipahami.',
+      },
+    ],
   },
-  {
-    step: '03',
-    icon: LineChart,
-    title: 'Get Risk Score',
-    desc: 'Receive a clear probability score and personalized guidance.',
-  },
-]
+}
 
 export default function Home() {
+  const { language } = useLanguage()
+  const t = content[language] ?? content.en
+
   return (
     <>
       <section className="relative overflow-hidden bg-white">
@@ -92,20 +178,19 @@ export default function Home() {
           >
             <span className="mb-4 inline-flex items-center gap-2 rounded-full bg-teal-50 px-4 py-1.5 text-sm font-medium text-primary">
               <Shield className="h-4 w-4" />
-              Early Stroke Detection
+              {t.badge}
             </span>
             <h1 className="mx-auto max-w-3xl text-3xl font-extrabold leading-tight tracking-tight text-text sm:text-4xl lg:text-5xl">
-              Know Your Risk.{' '}
-              <span className="text-primary">Before It&apos;s Too Late.</span>
+              {t.titleMain}{' '}
+              <span className="text-primary">{t.titleHighlight}</span>
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-base text-muted sm:text-lg">
-              StrokeSense helps you understand your stroke risk early — so you
-              can take action while prevention is still possible.
+              {t.subtitle}
             </p>
             <div className="mt-8 flex flex-col items-center gap-3">
               <Link to="/check">
                 <Button className="gap-2 px-8 text-base">
-                  Check Your Risk
+                  {t.checkButton}
                   <ArrowRight className="h-5 w-5" />
                 </Button>
               </Link>
@@ -113,7 +198,7 @@ export default function Home() {
                 href="#how-it-works"
                 className="text-sm text-muted underline-offset-4 transition-colors hover:text-primary hover:underline"
               >
-                See how it works ↓
+                {t.howItWorksLink}
               </a>
             </div>
           </motion.div>
@@ -122,35 +207,24 @@ export default function Home() {
 
       <PageWrapper>
         <div className="grid gap-4 sm:grid-cols-3">
-          <StatCard
-            value={1}
-            suffix=" in 4"
-            label="Adults Will Have a Stroke"
-            delay={0}
-            Icon={Users}
-          />
-          <StatCard
-            value={80}
-            suffix="%"
-            label="Are Preventable"
-            delay={150}
-            Icon={ShieldCheck}
-          />
-          <StatCard
-            value={100}
-            suffix="%"
-            label="Early Detection Saves Lives"
-            delay={300}
-            Icon={HeartPulse}
-          />
+          {t.stats.map((stat, index) => (
+            <StatCard
+              key={stat.label}
+              value={stat.value}
+              suffix={stat.suffix}
+              label={stat.label}
+              delay={index * 150}
+              Icon={stat.icon}
+            />
+          ))}
         </div>
 
         <section id="how-it-works" className="mt-16 scroll-mt-24">
           <h2 className="mb-8 text-center text-2xl font-extrabold tracking-tight text-text">
-            How It Works
+            {t.howItWorksTitle}
           </h2>
           <div className="grid gap-6 md:grid-cols-3">
-            {explainerSteps.map((step, i) => (
+            {t.steps.map((step, i) => (
               <motion.div
                 key={step.title}
                 initial={{ opacity: 0, y: 16 }}
@@ -159,7 +233,7 @@ export default function Home() {
                 transition={{ delay: i * 0.1 }}
                 className="relative flex flex-col items-center text-center"
               >
-                {i < explainerSteps.length - 1 && (
+                {i < t.steps.length - 1 && (
                   <div className="absolute left-[calc(50%+40px)] top-10 hidden h-0.5 w-[calc(100%-80px)] bg-primary/30 md:block" />
                 )}
                 <p className="mb-2 text-xs font-bold text-primary/50">
